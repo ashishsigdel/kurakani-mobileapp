@@ -4,10 +4,12 @@ import ApiError from "./utils/apiError.js";
 import ApiResponse from "./utils/apiResponse.js";
 
 import apiRoute from "./routes/index.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 const httpServer = createServer(app);
 

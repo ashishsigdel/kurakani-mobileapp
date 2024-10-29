@@ -3,6 +3,10 @@ import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import db from "../models/index.js";
 import ApiResponse from "../utils/apiResponse.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/jwtUtils.js";
 
 const { User, RefreshToken } = db;
 
@@ -161,5 +165,5 @@ export const login = asyncHandler(async (req, res) => {
     status: 200,
     message: "user login succcessfully!",
     data: responseData,
-  });
+  }).send(res);
 });

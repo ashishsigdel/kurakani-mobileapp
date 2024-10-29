@@ -23,3 +23,7 @@ export const generateAccessToken = ({ userId, refreshToken }) => {
     expiresIn: "1800sec",
   });
 };
+
+export const verifyToken = (token) => {
+  return jwt.verify(token, process.env.SECRET_KEY);
+};
