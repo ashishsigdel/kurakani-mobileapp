@@ -7,6 +7,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/jwtUtils.js";
+import { verifyToken } from "../utils/jwtUtils.js";
 
 const { User, RefreshToken } = db;
 
@@ -139,12 +140,12 @@ export const login = asyncHandler(async (req, res) => {
   const savedRefreshToken = await RefreshToken.create({
     token: refreshToken,
     userId: user.id,
-    expiresAt: Date.now() + 30 * 60000, // milisecond
+    expiresAt: Date.now() + 30 * 60000 * 48 * 30, // milisecond
   });
 
   const accessToken = generateAccessToken({
     userId: user.id,
-    refreshToken: refreshToken,
+    refreshTokenId: savedRefreshToken.id,
   });
 
   let responseData = {
@@ -158,12 +159,143 @@ export const login = asyncHandler(async (req, res) => {
   };
 
   res.cookie("accessToken", accessToken, {
-    httpOnlu: true,
+    httpOnly: true,
   });
 
   return new ApiResponse({
     status: 200,
     message: "user login succcessfully!",
     data: responseData,
+  }).send(res);
+});
+
+export const refreshTokenAccess = asyncHandler(async (req, res) => {
+  let accessToken;
+  if (req && req.cookies && req.cookies.accessToken) {
+    accessToken = req.cookies.accessToken;
+  }
+  if (!accessToken) {
+    throw new ApiError({
+      status: 401,
+      message: "Unauthorized",
+    });
+  }
+
+  const decodedToken = verifyToken(accessToken);
+
+  if (!decodedToken) {
+    throw new ApiError({
+      status: 401,
+      message: "Unauthorized",
+    });
+  }
+
+  const refreshToken = await RefreshToken.findOne({
+    where: {
+      id: decodedToken.rfId,
+      userId: decodedToken.id,
+    },
+  });
+
+  if (!refreshToken) {
+    throw new ApiError({
+      status: 401,
+      message: "Refresh token not found!",
+    });
+  }
+
+  verifyToken(refreshToken.token);
+
+  const user = await User.findOne({
+    where: {
+      id: decodedToken.id,
+    },
+    attributes: {
+      exclude: ["password", "createdAt", "updatedAt", "deletedAt"],
+    },
+  });
+
+  if (!user) {
+    throw new ApiError({
+      status: 401,
+      message: "User not found with provided token!",
+    });
+  }
+
+  const newAccessToken = generateAccessToken({
+    userId: user.id,
+    refreshTokenId: refreshToken.id,
+  });
+
+  let responseData = {
+    accessToken: newAccessToken,
+    user: await User.findOne({
+      where: {
+        id: user.id,
+      },
+      attributes: ["id", "fullName", "username", "email", "profilePic"],
+    }),
+  };
+
+  res.cookie("accessToken", newAccessToken, {
+    httpOnly: true,
+  });
+
+  return new ApiResponse({
+    status: 200,
+    message: "Refresh token refreshed.",
+    data: responseData,
+  }).send(res);
+});
+
+export const logout = asyncHandler(async (req, res) => {
+  let accessToken;
+  if (req && req.cookies && req.cookies.accessToken) {
+    accessToken = req.cookies.accessToken;
+  }
+  if (!accessToken) {
+    throw new ApiError({
+      status: 401,
+      message: "Unauthorized",
+    });
+  }
+
+  const decodedToken = verifyToken(accessToken);
+
+  if (!decodedToken) {
+    throw new ApiError({
+      status: 401,
+      message: "Unauthorized",
+    });
+  }
+
+  const refreshToken = await RefreshToken.findOne({
+    where: {
+      id: decodedToken.rfId,
+      userId: decodedToken.id,
+    },
+  });
+
+  if (!refreshToken) {
+    throw new ApiError({
+      status: 401,
+      message: "Refresh token not found!",
+    });
+  }
+
+  verifyToken(refreshToken.token);
+
+  await RefreshToken.destroy({
+    where: {
+      id: refreshToken.id,
+    },
+    force: true,
+  });
+
+  res.clearCookie("accessToken");
+
+  return new ApiResponse({
+    status: 200,
+    message: "Logged out successfully",
   }).send(res);
 });

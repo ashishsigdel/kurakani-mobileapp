@@ -1,9 +1,9 @@
 const connectionAssociation = (db) => {
-  db.Connection.belongsToMany(db.User, {
-    through: "user_connection",
-    foreignKey: "connectionId",
-    otherKey: "userId",
-    as: "users",
+  db.Connection.belongsTo(db.User, {
+    // through: "user_connection",
+    foreignKey: "friendId",
+    // otherKey: "userId",
+    as: "user",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   });

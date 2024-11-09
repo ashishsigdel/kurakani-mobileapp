@@ -8,7 +8,7 @@ const userAssociation = (db) => {
 
   db.User.hasMany(db.ConnectionRequest, {
     foreignKey: "senderId",
-    as: "sentRequests",
+    as: "sentRequest",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   });
@@ -20,10 +20,10 @@ const userAssociation = (db) => {
     onUpdate: "CASCADE",
   });
 
-  db.User.belongsToMany(db.Connection, {
-    through: "user_connection",
+  db.User.belongsTo(db.Connection, {
+    // through: "user_connection",
     foreignKey: "userId",
-    otherKey: "connectionId",
+    // otherKey: "connectionId",
     as: "connections",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
@@ -39,6 +39,13 @@ const userAssociation = (db) => {
   db.User.hasMany(db.ConnectionRequest, {
     foreignKey: "receiverId",
     as: "receivedRequests",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  db.User.hasMany(db.ResetPassword, {
+    foreignKey: "userId",
+    as: "otp",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   });

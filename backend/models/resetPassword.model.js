@@ -1,6 +1,6 @@
-const Connection = (sequelize, Sequelize, DataTypes) => {
+const ResetPassword = (sequelize, Sequelize, DataTypes) => {
   return sequelize.define(
-    "Connection",
+    "ResetPassword",
     {
       id: {
         type: DataTypes.BIGINT,
@@ -11,25 +11,23 @@ const Connection = (sequelize, Sequelize, DataTypes) => {
         type: DataTypes.BIGINT,
         allowNull: false,
       },
-      friendId: {
-        type: DataTypes.BIGINT,
-        allowNull: false,
-      },
-      conversationId: {
-        type: DataTypes.BIGINT,
-        allowNull: false,
-      },
-      lastMessageAt: {
+      expiresAt: {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      lastMessage: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      isSendByme: {
+      isUsed: {
         type: DataTypes.BOOLEAN,
-        allowNull: true,
+        allowNull: false,
+        default: false,
+      },
+      resetToken: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      otp: {
+        type: DataTypes.STRING(300),
+        allowNull: false,
       },
     },
     {
@@ -40,4 +38,4 @@ const Connection = (sequelize, Sequelize, DataTypes) => {
   );
 };
 
-export default Connection;
+export default ResetPassword;

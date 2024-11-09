@@ -11,16 +11,16 @@ export const generateRefreshToken = ({ userId }) => {
     payload: {
       id: userId,
     },
-    expiresIn: "1800sec",
+    expiresIn: "30d",
   });
 };
-export const generateAccessToken = ({ userId, refreshToken }) => {
+export const generateAccessToken = ({ userId, refreshTokenId }) => {
   return generateToken({
     payload: {
       id: userId,
-      rfId: refreshToken,
+      rfId: refreshTokenId,
     },
-    expiresIn: "1800sec",
+    expiresIn: "30m",
   });
 };
 

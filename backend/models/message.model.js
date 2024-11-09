@@ -1,17 +1,17 @@
-const Connection = (sequelize, Sequelize, DataTypes) => {
+const Message = (sequelize, Sequelize, DataTypes) => {
   return sequelize.define(
-    "Connection",
+    "Message",
     {
       id: {
         type: DataTypes.BIGINT,
         primaryKey: true,
         autoIncrement: true,
       },
-      userId: {
+      senderId: {
         type: DataTypes.BIGINT,
         allowNull: false,
       },
-      friendId: {
+      receiverId: {
         type: DataTypes.BIGINT,
         allowNull: false,
       },
@@ -19,16 +19,12 @@ const Connection = (sequelize, Sequelize, DataTypes) => {
         type: DataTypes.BIGINT,
         allowNull: false,
       },
-      lastMessageAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
-      lastMessage: {
-        type: DataTypes.STRING,
+      message: {
+        type: DataTypes.TEXT,
         allowNull: true,
       },
-      isSendByme: {
-        type: DataTypes.BOOLEAN,
+      mediaURL: {
+        type: DataTypes.STRING(300),
         allowNull: true,
       },
     },
@@ -40,4 +36,4 @@ const Connection = (sequelize, Sequelize, DataTypes) => {
   );
 };
 
-export default Connection;
+export default Message;
