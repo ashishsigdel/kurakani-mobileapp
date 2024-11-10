@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -25,6 +26,7 @@
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "sequelize": "^6.37.5",
+    "socket.io": "^4.8.1",
     "stream": "^0.0.3",
     "uuidv4": "^6.2.13"
   }

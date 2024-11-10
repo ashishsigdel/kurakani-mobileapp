@@ -1,10 +1,10 @@
 import express from "express";
 import { createServer } from "http";
 import ApiError from "./utils/apiError.js";
-import ApiResponse from "./utils/apiResponse.js";
 
 import apiRoute from "./routes/index.js";
 import cookieParser from "cookie-parser";
+import setUpSocket from "./socket.js";
 
 const app = express();
 
@@ -12,6 +12,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 const httpServer = createServer(app);
+
+const { io } = setUpSocket(httpServer);
 
 const logging = async (req, res, next) => {
   console.log(`Requested ${req.method} ${req.originalUrl} !!!`);
@@ -40,6 +42,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-export { app };
+export { app, io };
 
 export default httpServer;

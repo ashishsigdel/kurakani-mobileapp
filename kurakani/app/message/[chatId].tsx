@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { myAxios } from "@/helper/apiServices";
 import { User } from "@/types/User";
+import { useSocket } from "@/helper/SocketProvider";
 
 // Define types for the message structure
 interface ChatMessage {
@@ -32,6 +33,8 @@ interface ChatMessage {
 
 const Chat = () => {
   const { chatId } = useLocalSearchParams();
+
+  const { socket } = useSocket();
 
   const [imageSelected, setImageSelected] = useState<
     ImagePicker.ImagePickerAsset[] | []
@@ -150,6 +153,25 @@ const Chat = () => {
       setIsImageSending(false);
     }
   };
+
+  useEffect(() => {
+    socket.on("newMessage", (newMessage: any) => {
+      const appendMessage: ChatMessage = {
+        conversationId: chatId as string,
+        createdAt: newMessage.createdAt,
+        deletedAt: newMessage.deletedAt,
+        id: newMessage.id,
+        isSendByme: false,
+        mediaURL: newMessage.mediaURL,
+        message: newMessage.message,
+        receiverId: newMessage.receiverId,
+        senderId: newMessage.senderId,
+        updatedAt: newMessage.updatedAt,
+      };
+
+      setChatMessages((prevMessage) => [...prevMessage, appendMessage]);
+    });
+  }, [socket]);
 
   useFocusEffect(
     useCallback(() => {

@@ -4,6 +4,8 @@ import { getImageUrl } from "../utils/fileUpload.js";
 
 import db from "../models/index.js";
 import ApiResponse from "../utils/apiResponse.js";
+import { getReceiverSocketId } from "../socket.js";
+import { io } from "../app.js";
 const { Message, Conversation, User, Connection } = db;
 
 export const sendMessage = asyncHandler(async (req, res) => {
@@ -105,6 +107,12 @@ export const sendMessage = asyncHandler(async (req, res) => {
     lastMessage: messageDisplay,
     isSendByme: false,
   });
+
+  const receiverSocketId = getReceiverSocketId(receiverId);
+
+  if (receiverSocketId) {
+    io.to(receiverSocketId).emit("newMessage", newMessage);
+  }
 
   return new ApiResponse({
     status: 200,

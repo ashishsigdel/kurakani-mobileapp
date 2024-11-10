@@ -11,6 +11,7 @@ import React, { useState, useEffect } from "react";
 import profile from "@/assets/profile.png";
 import { Ionicons } from "@expo/vector-icons";
 import { getLinkPreview } from "link-preview-js";
+import LottieView from "lottie-react-native";
 
 interface MessageType {
   id: number;
@@ -118,7 +119,7 @@ const MessageSection = ({
       )}
       {chatMessages.map((message: MessageType) => (
         <View
-          className={`w-full py-3 mb-3 px-3 flex-row space-x-2 ${
+          className={`w-full py-3 px-3 flex-row space-x-2 ${
             message.isSendByme ? "justify-end" : "justify-start"
           }`}
           key={message.id}
@@ -151,6 +152,7 @@ const MessageSection = ({
                 </Text>
               </View>
             )}
+
             {/* Link Preview */}
             {extractUrls(message.message).map((url, index) => (
               <LinkPreviewCard key={index} url={url} />
@@ -158,6 +160,20 @@ const MessageSection = ({
           </View>
         </View>
       ))}
+      {/* <View className={`w-full py-3 px-3 flex-row space-x-2 justify-start`}>
+        <Image
+          source={friendPic ? { uri: friendPic } : profile}
+          className="w-[32px] h-[32px] rounded-full"
+        />
+        <View className={`max-w-[70%]`}>
+          <LottieView
+            source={require("../../constants/typing.json")}
+            autoPlay
+            loop
+            style={{ width: 50, height: 30 }}
+          />
+        </View>
+      </View> */}
       <>
         {selectedImage.length > 0 && (
           <View className="mb-3 justify-end w-full flex-row px-3 relative">

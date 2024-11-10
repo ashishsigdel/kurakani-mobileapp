@@ -5,6 +5,7 @@ import ChatUser from "@/components/ChatUser";
 import { Link, router, useFocusEffect } from "expo-router";
 import { myAxios } from "@/helper/apiServices";
 import CustomButton from "@/components/CustomButton";
+import { useSocket } from "@/helper/SocketProvider";
 
 let searchTimeout: NodeJS.Timeout;
 
@@ -14,6 +15,7 @@ const chat = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState([]);
+  const { socket } = useSocket();
 
   const fetchConnections = async (searchQuery: string = "") => {
     setIsLoading(true);
@@ -53,6 +55,12 @@ const chat = () => {
       }
     }, [])
   );
+
+  useEffect(() => {
+    socket.on("newMessage", (newMessage: any) => {
+      fetchConnections();
+    });
+  }, [socket]);
 
   return (
     <SafeAreaView className="bg-primary h-full w-full">
