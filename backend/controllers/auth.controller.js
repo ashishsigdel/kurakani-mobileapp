@@ -180,8 +180,10 @@ export const refreshTokenAccess = asyncHandler(async (req, res) => {
       message: "Unauthorized",
     });
   }
-
-  const decodedToken = verifyToken(accessToken);
+  const decodedToken = verifyToken({
+    token: accessToken,
+    ignoreExpiration: true,
+  });
 
   if (!decodedToken) {
     throw new ApiError({
@@ -204,7 +206,7 @@ export const refreshTokenAccess = asyncHandler(async (req, res) => {
     });
   }
 
-  verifyToken(refreshToken.token);
+  verifyToken({ token: refreshToken.token });
 
   const user = await User.findOne({
     where: {
@@ -260,7 +262,10 @@ export const logout = asyncHandler(async (req, res) => {
     });
   }
 
-  const decodedToken = verifyToken(accessToken);
+  const decodedToken = verifyToken({
+    token: accessToken,
+    ignoreExpiration: true,
+  });
 
   if (!decodedToken) {
     throw new ApiError({
@@ -283,7 +288,7 @@ export const logout = asyncHandler(async (req, res) => {
     });
   }
 
-  verifyToken(refreshToken.token);
+  verifyToken({ token: refreshToken.token });
 
   await RefreshToken.destroy({
     where: {

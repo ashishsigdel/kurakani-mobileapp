@@ -13,7 +13,12 @@ app.use(cookieParser());
 
 const httpServer = createServer(app);
 
-app.use("/api", apiRoute);
+const loging = async (req, res, next) => {
+  console.log(`Requested ${req.method} ${req.originalUrl} !!!`);
+  next();
+};
+
+app.use("/api", loging, apiRoute);
 
 app.use((req, res, next) => {
   throw new ApiError({

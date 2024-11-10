@@ -29,7 +29,7 @@ const FormField = ({
   return (
     <View className={`w-full ${otherStyles}`}>
       <Text className="text-base text-gray-100 font-semibold">{title}</Text>
-      <View className="w-full h-14 px-4 bg-black/50 border-2 border-black-30 rounded-2xl items-center justify-center flex-row mt-1">
+      <View className="w-full h-14 px-4 bg-black/50 border-2 border-white/10 rounded-2xl items-center justify-center flex-row mt-1">
         <TextInput
           className="text-white flex-1 font-semibold text-base "
           value={value}

@@ -5,6 +5,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
@@ -12,13 +13,48 @@ import logo from "@/assets/logo.png";
 import FormField from "@/components/FormField";
 import CustomButton from "@/components/CustomButton";
 import { Link, router } from "expo-router";
+import { myAxios } from "@/helper/apiServices";
+import { useAuth } from "@/helper/GlobalProvider";
 
 const signin = () => {
+  const { signIn } = useAuth();
   const [form, setform] = useState({
     email: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await myAxios.post("/auth/login", form);
+
+      if (!response) return;
+      const { accessToken, user } = response.data.data;
+
+      if (!accessToken && !user) {
+        Alert.alert("Error", "Cannot create session!");
+        return;
+      }
+
+      //save accesstoken and user in local storage
+      signIn(accessToken, user)
+        .then(() => {
+          router.push("/chat");
+        })
+        .catch((error) => {
+          Alert.alert("SignIn Unsuccessful!", "Something went wrong!");
+        });
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.data) {
+        Alert.alert("SignIn Unsuccessful!", error.response.data.message);
+      }
+      Alert.alert("SignIn Unsuccessful!", "Something went wrong!");
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
@@ -66,9 +102,7 @@ const signin = () => {
             </View>
             <CustomButton
               title={"Sign In"}
-              handlePress={() => {
-                router.push("/chat");
-              }}
+              handlePress={handleSignin}
               containerStyles={"py-2 px-3 bg-secondary w-full mt-7"}
               textStyles={"text-xl text-white font-semibold uppercase"}
               isLoading={isLoading}

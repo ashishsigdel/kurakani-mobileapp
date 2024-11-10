@@ -76,17 +76,19 @@ export const sendMessage = asyncHandler(async (req, res) => {
     });
   }
 
+  const messageDisplay = message ? message : publicUrl ? "Sent a photo." : null;
+
   const newMessage = await Message.create({
     senderId: req.user.id,
     receiverId,
     conversationId,
-    message,
+    message: message,
     mediaURL: publicUrl,
   });
 
   const updateConnection = await checkConnection.update({
     lastMessageAt: Date.now(),
-    lastMessage: message,
+    lastMessage: messageDisplay,
     isSendByme: true,
   });
 
@@ -100,7 +102,7 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
   const updateConnectionOther = await checkConnectionOther.update({
     lastMessageAt: Date.now(),
-    lastMessage: message,
+    lastMessage: messageDisplay,
     isSendByme: false,
   });
 

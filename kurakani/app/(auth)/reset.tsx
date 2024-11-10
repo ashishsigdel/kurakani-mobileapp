@@ -5,6 +5,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
@@ -12,13 +13,38 @@ import logo from "@/assets/logo.png";
 import FormField from "@/components/FormField";
 import CustomButton from "@/components/CustomButton";
 import { Link, router } from "expo-router";
+import { myAxios } from "@/helper/apiServices";
+import { useGuest } from "@/helper/GuestProvider";
 
 const reset = () => {
   const [form, setform] = useState({
     email: "",
-    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { sendOtp } = useGuest();
+
+  const handleSendOtp = async () => {
+    setIsLoading(true);
+    try {
+      const response = await myAxios.post("reset-password/send", form);
+      const resetToken = response.data.data.resetToken;
+
+      sendOtp(form.email, resetToken)
+        .then(() => {
+          Alert.alert("Success", "OTP sent successfully");
+          router.push("/confirm-otp");
+        })
+        .catch((error: any) => {
+          Alert.alert("Error!", error.message);
+        });
+    } catch (error: any) {
+      if (error.response) {
+        Alert.alert("Error!", error.response.data.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <SafeAreaView className="bg-primary h-full">
       <KeyboardAvoidingView
@@ -50,10 +76,8 @@ const reset = () => {
             />
 
             <CustomButton
-              title={"Send OTP"}
-              handlePress={() => {
-                router.push("/confirm-otp");
-              }}
+              title={isLoading ? "Loading..." : "Send OTP"}
+              handlePress={handleSendOtp}
               containerStyles={"py-2 px-3 bg-secondary w-full mt-7"}
               textStyles={"text-xl text-white font-semibold uppercase"}
               isLoading={isLoading}

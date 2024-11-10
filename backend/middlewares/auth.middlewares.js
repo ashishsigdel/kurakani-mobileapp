@@ -17,7 +17,15 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const decodedToken = verifyToken(accessToken);
+  let decodedToken;
+  try {
+    decodedToken = verifyToken({ token: accessToken });
+  } catch (error) {
+    throw new ApiError({
+      status: 401,
+      message: "Unauthorized",
+    });
+  }
 
   if (!decodedToken) {
     throw new ApiError({
@@ -40,7 +48,7 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
     });
   }
 
-  verifyToken(refreshToken.token);
+  verifyToken({ token: refreshToken.token });
 
   if (refreshToken.expiresAt < Date.now()) {
     throw new ApiError({

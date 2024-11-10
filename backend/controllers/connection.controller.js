@@ -93,14 +93,14 @@ export const acceptRequest = asyncHandler(async (req, res) => {
   const newConnection = await Connection.create({
     userId: user.id,
     friendId: connection.senderId,
-    conversationId: connection.id,
+    conversationId: conversation.id,
     lastMessageAt: Date.now(),
   });
 
   await Connection.create({
     userId: connection.senderId,
     friendId: user.id,
-    conversationId: connection.id,
+    conversationId: conversation.id,
     lastMessageAt: Date.now(),
   });
 
@@ -164,12 +164,12 @@ export const fetchConnections = asyncHandler(async (req, res) => {
       [Op.or]: [
         {
           fullName: {
-            [Op.like]: `%${search}`,
+            [Op.like]: `%${search}%`,
           },
         },
         {
           username: {
-            [Op.like]: `%${search}`,
+            [Op.like]: `%${search}%`,
           },
         },
       ],

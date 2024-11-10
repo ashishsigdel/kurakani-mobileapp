@@ -5,6 +5,8 @@ import CustomButton from "./CustomButton";
 import { Ionicons } from "@expo/vector-icons";
 import FormField from "./FormField";
 import * as ImagePicker from "expo-image-picker";
+import { useAuth } from "@/helper/GlobalProvider";
+import { myAxios } from "@/helper/apiServices";
 
 interface ProfileProps {
   setOpenEdit: any;
@@ -12,13 +14,15 @@ interface ProfileProps {
 }
 
 const ProfileEdit = ({ setOpenEdit, openEdit }: ProfileProps) => {
+  const [loading, setLoading] = useState(false);
+  const { user, updateUser } = useAuth();
   const handleEditOpen = () => {
     setOpenEdit(false);
   };
   const [form, setform] = useState({
-    fullName: "John Doe",
-    email: "johndoe1@gmail.com",
-    username: "johndoe1",
+    fullName: user?.fullName,
+    email: user?.email,
+    username: user?.username,
   });
   const [imageSelected, setImageSelected] =
     useState<ImagePicker.ImagePickerAsset | null>(null);
@@ -45,6 +49,37 @@ const ProfileEdit = ({ setOpenEdit, openEdit }: ProfileProps) => {
       setImageSelected(result.assets[0]);
     }
   };
+
+  const handleUpdate = async () => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("fullName", form.fullName || "");
+      formData.append("email", form.email || "");
+      formData.append("username", form.username || "");
+
+      if (imageSelected && imageSelected.uri && imageSelected.type) {
+        formData.append("profilePic", {
+          uri: imageSelected.uri,
+          type: imageSelected.type,
+          name: imageSelected.fileName || "",
+        } as any);
+      }
+      const response = await myAxios.put("/user/update", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      updateUser(response.data.data);
+      setOpenEdit(false);
+    } catch (error: any) {
+      if (error.response) {
+        Alert.alert("Error!", error.response.data.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <View className="w-full justify-center items-center px-4 my-6 h-[80vh]">
       <Text className="text-3xl text-white font-bold text-center">
@@ -53,7 +88,13 @@ const ProfileEdit = ({ setOpenEdit, openEdit }: ProfileProps) => {
 
       <View className="relative">
         <Image
-          source={imageSelected ? { uri: imageSelected.uri } : profile}
+          source={
+            imageSelected
+              ? { uri: imageSelected.uri }
+              : user?.profilePic
+              ? { uri: user.profilePic }
+              : profile
+          }
           className="w-[130px] h-[130px] rounded-full mt-7 border border-white "
         />
         <TouchableOpacity
@@ -71,7 +112,7 @@ const ProfileEdit = ({ setOpenEdit, openEdit }: ProfileProps) => {
       </View>
       <FormField
         title=""
-        value={form.fullName}
+        value={form.fullName ? form.fullName : ""}
         handleChange={(e: any) => {
           setform({
             ...form,
@@ -83,7 +124,7 @@ const ProfileEdit = ({ setOpenEdit, openEdit }: ProfileProps) => {
       />
       <FormField
         title=""
-        value={form.username}
+        value={form.username ? form.username : ""}
         handleChange={(e: any) => {
           setform({
             ...form,
@@ -95,7 +136,7 @@ const ProfileEdit = ({ setOpenEdit, openEdit }: ProfileProps) => {
       />
       <FormField
         title=""
-        value={form.email}
+        value={form.email ? form.email : ""}
         handleChange={(e: any) => {
           setform({
             ...form,
@@ -106,8 +147,8 @@ const ProfileEdit = ({ setOpenEdit, openEdit }: ProfileProps) => {
         placeholder="Email"
       />
       <CustomButton
-        title="Update"
-        handlePress={handleEditOpen}
+        title={loading ? "Loading..." : "Update"}
+        handlePress={handleUpdate}
         containerStyles="mt-7 w-full bg-secondary min-h-[40px]"
         textStyles={"text-xl text-white font-semibold uppercase"}
       />

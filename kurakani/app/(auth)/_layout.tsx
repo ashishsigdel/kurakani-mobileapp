@@ -1,10 +1,15 @@
 import { View, Text, StatusBar } from "react-native";
 import React from "react";
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
+import { useAuth } from "@/helper/GlobalProvider";
+import { GuestProvider } from "@/helper/GuestProvider";
 
 const AuthLayout = () => {
+  const { user, loading } = useAuth();
+
+  if (!loading && user) return <Redirect href={"/chat"} />;
   return (
-    <>
+    <GuestProvider>
       <Stack>
         <Stack.Screen
           name="signin"
@@ -38,7 +43,7 @@ const AuthLayout = () => {
         />
       </Stack>
       <StatusBar barStyle={"light-content"} />
-    </>
+    </GuestProvider>
   );
 };
 

@@ -1,10 +1,11 @@
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, Alert } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
 import logo from "@/assets/logo.png";
 import FormField from "@/components/FormField";
 import CustomButton from "@/components/CustomButton";
 import { Link, router } from "expo-router";
+import { myAxios } from "@/helper/apiServices";
 
 const signup = () => {
   const [form, setform] = useState({
@@ -14,6 +15,27 @@ const signup = () => {
     confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignUp = async () => {
+    setIsLoading(true);
+    try {
+      const response = await myAxios.post("/auth/register", form);
+      Alert.alert("Registration Successful!", "You have been registered.");
+      setform({
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+      router.push("/signin");
+    } catch (error: any) {
+      if (error.response.data.message) {
+        Alert.alert("Registration Unsuccessful!", error.response.data.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
@@ -77,10 +99,8 @@ const signup = () => {
             />
 
             <CustomButton
-              title={"Sign Up"}
-              handlePress={() => {
-                router.push("/signin");
-              }}
+              title={isLoading ? "Loading..." : "Sign Up"}
+              handlePress={handleSignUp}
               containerStyles={"py-2 px-3 bg-secondary w-full mt-7"}
               textStyles={"text-xl text-white font-semibold uppercase"}
               isLoading={isLoading}
