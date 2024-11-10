@@ -176,6 +176,7 @@ const Chat = () => {
             isImageSending={isImageSending}
             setSelectdImage={setImageSelected}
             chatMessages={chatMessages}
+            friendPic={chatUser?.profilePic}
           />
         </ScrollView>
 

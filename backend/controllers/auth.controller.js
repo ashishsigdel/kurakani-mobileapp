@@ -6,6 +6,8 @@ import ApiResponse from "../utils/apiResponse.js";
 import {
   generateAccessToken,
   generateRefreshToken,
+  getAuthToken,
+  getCookieToken,
 } from "../utils/jwtUtils.js";
 import { verifyToken } from "../utils/jwtUtils.js";
 
@@ -158,7 +160,7 @@ export const login = asyncHandler(async (req, res) => {
     }),
   };
 
-  res.cookie("accessToken", accessToken, {
+  res.cookie("accessToken", `Bearer ${accessToken}`, {
     httpOnly: true,
   });
 
@@ -170,18 +172,23 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 export const refreshTokenAccess = asyncHandler(async (req, res) => {
-  let accessToken;
-  if (req && req.cookies && req.cookies.accessToken) {
-    accessToken = req.cookies.accessToken;
+  const token = getCookieToken(req) || getAuthToken(req);
+
+  if (!token) {
+    throw new ApiError({
+      message: "Unauthorized",
+      status: 401,
+    });
   }
-  if (!accessToken) {
+
+  if (!token) {
     throw new ApiError({
       status: 401,
       message: "Unauthorized",
     });
   }
   const decodedToken = verifyToken({
-    token: accessToken,
+    token: token,
     ignoreExpiration: true,
   });
 
@@ -239,7 +246,7 @@ export const refreshTokenAccess = asyncHandler(async (req, res) => {
     }),
   };
 
-  res.cookie("accessToken", newAccessToken, {
+  res.cookie("accessToken", `Bearer ${newAccessToken}`, {
     httpOnly: true,
   });
 

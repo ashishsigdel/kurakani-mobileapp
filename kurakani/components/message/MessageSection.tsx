@@ -31,6 +31,7 @@ interface MessageSectionProps {
   setSelectdImage: any;
   chatMessages: any;
   isImageSending: boolean;
+  friendPic: string | undefined;
 }
 
 const LinkPreviewCard = ({ url }: { url: string }) => {
@@ -100,6 +101,7 @@ const MessageSection = ({
   setSelectdImage,
   chatMessages,
   isImageSending,
+  friendPic,
 }: MessageSectionProps) => {
   const handleRemove = () => {
     setSelectdImage([]);
@@ -123,7 +125,7 @@ const MessageSection = ({
         >
           {!message.isSendByme && (
             <Image
-              source={profile}
+              source={friendPic ? { uri: friendPic } : profile}
               className="w-[32px] h-[32px] rounded-full"
             />
           )}

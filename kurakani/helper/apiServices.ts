@@ -26,15 +26,18 @@ const refreshAccessToken = async () => {
     const storedToken = await AsyncStorage.getItem("accessToken");
     const accessToken = decryptAccessToken(storedToken || "");
     if (!accessToken) {
+      await AsyncStorage.removeItem("accessToken");
+      await AsyncStorage.removeItem("user");
+      router.push("/signin");
       throw new Error("No access token found");
     }
     const response = await axios.post(
-      `${apiURL}/api/auth/refresh-token`,
+      `${apiURL}/api/v1/auth/refresh-token`,
       {},
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: accessToken,
+          Authorization: "Bearer " + accessToken,
         },
       }
     );
@@ -60,14 +63,13 @@ myAxios.interceptors.response.use(
     ];
     function isBypassUrl(url: string): boolean {
       if (byPassUrls.includes(url)) return true;
-
       return false;
     }
     if (error.config && isBypassUrl(error.config.url)) throw error;
     if (error.response && error.response.status === 401) {
       const newAccessToken = await refreshAccessToken();
       const originalRequest = error.config;
-      originalRequest.headers.Authorization = `${newAccessToken}`;
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       return myAxios(originalRequest);
     }
     throw error;
@@ -78,7 +80,7 @@ myAxios.interceptors.request.use(async (config) => {
   const storedToken = await AsyncStorage.getItem("accessToken");
   if (storedToken) {
     const decryptedToken = decryptAccessToken(storedToken);
-    config.headers.Authorization = `${decryptedToken}`;
+    config.headers.Authorization = `Bearer ${decryptedToken}`;
   }
   return config;
 });

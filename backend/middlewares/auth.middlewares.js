@@ -1,15 +1,16 @@
 import ApiError from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { verifyToken } from "../utils/jwtUtils.js";
+import {
+  getAuthToken,
+  getCookieToken,
+  verifyToken,
+} from "../utils/jwtUtils.js";
 import db from "../models/index.js";
 
 const { User, RefreshToken } = db;
 
 export const authMiddleware = asyncHandler(async (req, res, next) => {
-  let accessToken;
-  if (req && req.cookies && req.cookies.accessToken) {
-    accessToken = req.cookies.accessToken;
-  }
+  const accessToken = getCookieToken(req) || getAuthToken(req);
   if (!accessToken) {
     throw new ApiError({
       status: 401,

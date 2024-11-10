@@ -17,6 +17,8 @@ const ChatUser: React.FC<ChatUserProps> = ({ connection }) => {
       <View className="flex-row items-center space-x-4 w-full">
         <View className="relative">
           <Image
+            width={12}
+            height={12}
             source={
               connection.user.profilePic
                 ? { uri: connection.user.profilePic }
