@@ -43,13 +43,13 @@ const signin = () => {
           router.push("/chat");
         })
         .catch((error) => {
-          Alert.alert("SignIn Unsuccessful!", "Something went wrong!");
+          Alert.alert("Error!", "Something went wrong!");
         });
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.data) {
-        Alert.alert("SignIn Unsuccessful!", error.response.data.message);
+        Alert.alert("Error!", error.response.data.message);
       }
-      Alert.alert("SignIn Unsuccessful!", "Something went wrong!");
+      Alert.alert("Error!", "Something went wrong!");
       console.log(error);
     } finally {
       setIsLoading(false);

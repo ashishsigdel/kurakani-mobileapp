@@ -1,5 +1,5 @@
-import { View, Text, Alert, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import { View, TouchableOpacity } from "react-native";
+import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import MessageInput from "./MessageInput";
 

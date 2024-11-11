@@ -2,7 +2,6 @@ import {
   View,
   Text,
   Image,
-  Alert,
   TouchableOpacity,
   ActivityIndicator,
   Linking,
@@ -33,6 +32,7 @@ interface MessageSectionProps {
   chatMessages: any;
   isImageSending: boolean;
   friendPic: string | undefined;
+  isTyping: boolean;
 }
 
 const LinkPreviewCard = ({ url }: { url: string }) => {
@@ -103,6 +103,7 @@ const MessageSection = ({
   chatMessages,
   isImageSending,
   friendPic,
+  isTyping,
 }: MessageSectionProps) => {
   const handleRemove = () => {
     setSelectdImage([]);
@@ -160,20 +161,23 @@ const MessageSection = ({
           </View>
         </View>
       ))}
-      {/* <View className={`w-full py-3 px-3 flex-row space-x-2 justify-start`}>
-        <Image
-          source={friendPic ? { uri: friendPic } : profile}
-          className="w-[32px] h-[32px] rounded-full"
-        />
-        <View className={`max-w-[70%]`}>
-          <LottieView
-            source={require("../../constants/typing.json")}
-            autoPlay
-            loop
-            style={{ width: 50, height: 30 }}
+      {isTyping && (
+        <View className={`w-full py-3 px-3 flex-row space-x-2 justify-start`}>
+          <Image
+            source={friendPic ? { uri: friendPic } : profile}
+            className="w-[32px] h-[32px] rounded-full"
           />
+          <View className={`max-w-[70%]`}>
+            <LottieView
+              source={require("../../constants/typing.json")}
+              autoPlay
+              loop
+              style={{ width: 50, height: 30 }}
+            />
+          </View>
         </View>
-      </View> */}
+      )}
+
       <>
         {selectedImage.length > 0 && (
           <View className="mb-3 justify-end w-full flex-row px-3 relative">

@@ -16,20 +16,7 @@ import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { myAxios } from "@/helper/apiServices";
 import { User } from "@/types/User";
 import { useSocket } from "@/helper/SocketProvider";
-
-// Define types for the message structure
-interface ChatMessage {
-  conversationId: string;
-  createdAt: string;
-  deletedAt: string | null;
-  id: string;
-  isSendByme: boolean;
-  mediaURL: string | null;
-  message: string;
-  receiverId: string;
-  senderId: string;
-  updatedAt: string;
-}
+import { ChatMessage } from "@/types/ChatMessage";
 
 const Chat = () => {
   const { chatId } = useLocalSearchParams();
@@ -43,6 +30,8 @@ const Chat = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState("");
   const [isImageSending, setIsImageSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -108,6 +97,12 @@ const Chat = () => {
       if (!chatId || !chatUser) {
         return;
       }
+      if (socket) {
+        socket.emit("stopTyping", {
+          chatId,
+          receiverId: chatUser?.id,
+        });
+      }
       const formData = new FormData();
       formData.append("message", message);
 
@@ -155,6 +150,7 @@ const Chat = () => {
   };
 
   useEffect(() => {
+    if (!socket) return;
     socket.on("newMessage", (newMessage: any) => {
       const appendMessage: ChatMessage = {
         conversationId: chatId as string,
@@ -180,6 +176,57 @@ const Chat = () => {
     }, [])
   );
 
+  const handleTyping = (text: string) => {
+    setMessage(text);
+
+    // Clear any existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Emit typing event
+    socket.emit("typing", {
+      chatId,
+      receiverId: chatUser?.id,
+    });
+
+    // Set new timeout to stop typing indicator
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit("stopTyping", {
+        chatId,
+        receiverId: chatUser?.id,
+      });
+    }, 5000);
+  };
+
+  // Listen for typing events
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for typing status from other user
+    socket.on("userTyping", ({ chatId: typingChatId }) => {
+      if (typingChatId === chatId) {
+        setIsTyping(true);
+      }
+    });
+
+    // Listen for stop typing status from other user
+    socket.on("userStoppedTyping", ({ chatId: typingChatId }) => {
+      if (typingChatId === chatId) {
+        setIsTyping(false);
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      socket.off("userTyping");
+      socket.off("userStoppedTyping");
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [socket, chatId]);
+
   return (
     <SafeAreaView className="bg-primary h-full w-full">
       <KeyboardAvoidingView
@@ -199,12 +246,13 @@ const Chat = () => {
             setSelectdImage={setImageSelected}
             chatMessages={chatMessages}
             friendPic={chatUser?.profilePic}
+            isTyping={isTyping}
           />
         </ScrollView>
 
         <BottomBar
           message={message}
-          setMessage={setMessage}
+          setMessage={handleTyping}
           pickImage={pickImage}
           handleSend={sendMessage}
         />

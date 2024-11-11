@@ -41,7 +41,7 @@ export const generateAccessToken = ({ userId, refreshTokenId }) => {
       id: userId,
       rfId: refreshTokenId,
     },
-    expiresIn: "30d",
+    expiresIn: "30m",
   });
 };
 

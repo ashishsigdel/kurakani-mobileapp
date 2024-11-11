@@ -1,13 +1,20 @@
 import { View, Text, StatusBar } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Redirect, Stack } from "expo-router";
 import { useAuth } from "@/helper/GlobalProvider";
 import { GuestProvider } from "@/helper/GuestProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AuthLayout = () => {
-  const { user, loading } = useAuth();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = await AsyncStorage.getItem("user");
 
-  if (!loading && user) return <Redirect href={"/chat"} />;
+      if (user) return <Redirect href={"/chat"} />;
+    };
+    checkAuth();
+  }, []);
+
   return (
     <GuestProvider>
       <Stack>

@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosInstance } from "axios";
 import { router } from "expo-router";
-import { Linking } from "react-native";
 
 const apiURL = "http://192.168.1.85:8000";
 const baseUrl = `${apiURL}/api`;
@@ -22,33 +21,35 @@ const decryptAccessToken = (encryptedAccessToken: string) => {
 };
 
 const refreshAccessToken = async () => {
-  try {
-    const storedToken = await AsyncStorage.getItem("accessToken");
-    const accessToken = decryptAccessToken(storedToken || "");
-    if (!accessToken) {
-      await AsyncStorage.removeItem("accessToken");
-      await AsyncStorage.removeItem("user");
-      router.push("/signin");
-      throw new Error("No access token found");
-    }
-    const response = await axios.post(
-      `${apiURL}/api/v1/auth/refresh-token`,
-      {},
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + accessToken,
-        },
-      }
-    );
-    const newAccessToken: string = response.data.data.accessToken;
-    const encryptedAccessToken: string = encryptAccessToken(newAccessToken);
-    await AsyncStorage.setItem("accessToken", encryptedAccessToken);
-    return newAccessToken;
-  } catch (error: any) {
+  const accessToken = await AsyncStorage.getItem("accessToken");
+
+  if (!accessToken) {
     await AsyncStorage.removeItem("accessToken");
     await AsyncStorage.removeItem("user");
     router.push("/signin");
+  }
+
+  try {
+    const response = await myAxios.post("/auth/refresh-token", {});
+
+    const newAccessToken = response.data.data.accessToken;
+    const user = response.data.data.user;
+
+    if (!newAccessToken && !user) {
+      await AsyncStorage.removeItem("accessToken");
+      await AsyncStorage.removeItem("user");
+      router.push("/signin");
+    }
+
+    await AsyncStorage.setItem("accessToken", newAccessToken);
+    await AsyncStorage.setItem("user", JSON.stringify(user));
+
+    return newAccessToken;
+  } catch (error) {
+    await AsyncStorage.removeItem("accessToken");
+    await AsyncStorage.removeItem("user");
+    router.push("/signin");
+    return;
   }
 };
 
@@ -85,6 +86,6 @@ myAxios.interceptors.request.use(async (config) => {
   return config;
 });
 
-export { myAxios };
+export { myAxios, refreshAccessToken };
 
 export { apiURL };

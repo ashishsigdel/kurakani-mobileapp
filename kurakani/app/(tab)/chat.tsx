@@ -23,10 +23,9 @@ const chat = () => {
       const response = await myAxios.get(
         `/connection/get?search=${searchQuery ? searchQuery : ""}`
       );
+
       setUsers(response.data.data);
     } catch (error: any) {
-      console.log(error.response);
-
       if (error.response) {
         console.log(error.response.data.message);
       }
@@ -57,6 +56,7 @@ const chat = () => {
   );
 
   useEffect(() => {
+    if (!socket) return;
     socket.on("newMessage", (newMessage: any) => {
       fetchConnections();
     });

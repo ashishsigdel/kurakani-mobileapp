@@ -26,8 +26,29 @@ const setUpSocket = (httpServer) => {
 
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
+    // Handle typing status
+    socket.on("typing", ({ chatId, receiverId }) => {
+      const receiverSocketId = getReceiverSocketId(receiverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("userTyping", {
+          chatId,
+          typerId: userId,
+        });
+      }
+    });
+
+    // Handle stop typing status
+    socket.on("stopTyping", ({ chatId, receiverId }) => {
+      const receiverSocketId = getReceiverSocketId(receiverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("userStoppedTyping", {
+          chatId,
+          typerId: userId,
+        });
+      }
+    });
+
     socket.on("disconnect", () => {
-      console.log("Client disconnected!", socket.id);
       delete userSocketMap[userId];
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
