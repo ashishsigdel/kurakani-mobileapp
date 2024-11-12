@@ -118,10 +118,57 @@ export const getRandomUsers = asyncHandler(async (req, res) => {
       attributes: ["id", "fullName", "username", "email", "profilePic"],
     });
 
+    // Get connection status for each searched user
+    const usersWithStatus = await Promise.all(
+      users.map(async (user) => {
+        let connectionStatus = null;
+
+        // Check if request sent
+        const isRequestSent = await ConnectionRequest.findOne({
+          where: {
+            senderId: userId,
+            receiverId: user.id,
+          },
+        });
+        if (isRequestSent) {
+          connectionStatus = "sent";
+        }
+
+        // Check if request received
+        const isRequestReceived = await ConnectionRequest.findOne({
+          where: {
+            senderId: user.id,
+            receiverId: userId,
+          },
+        });
+        if (isRequestReceived) {
+          connectionStatus = "received";
+        }
+
+        // Check if already connected
+        const isConnected = await Connection.findOne({
+          where: {
+            [Op.or]: [
+              { userId: userId, friendId: user.id },
+              { userId: user.id, friendId: userId },
+            ],
+          },
+        });
+        if (isConnected) {
+          connectionStatus = "connected";
+        }
+
+        return {
+          ...user.toJSON(),
+          connectionStatus,
+        };
+      })
+    );
+
     return new ApiResponse({
       status: 200,
       message: "Users fetched successfully",
-      data: users,
+      data: usersWithStatus,
     }).send(res);
   } else {
     // If no search query, fetch random users
@@ -145,10 +192,57 @@ export const getRandomUsers = asyncHandler(async (req, res) => {
       limit: 10, // Limit to 10 users
     });
 
+    // Get connection status for each searched user
+    const randomUsersWithStatus = await Promise.all(
+      randomUsers.map(async (user) => {
+        let connectionStatus = null;
+
+        // Check if request sent
+        const isRequestSent = await ConnectionRequest.findOne({
+          where: {
+            senderId: userId,
+            receiverId: user.id,
+          },
+        });
+        if (isRequestSent) {
+          connectionStatus = "sent";
+        }
+
+        // Check if request received
+        const isRequestReceived = await ConnectionRequest.findOne({
+          where: {
+            senderId: user.id,
+            receiverId: userId,
+          },
+        });
+        if (isRequestReceived) {
+          connectionStatus = "received";
+        }
+
+        // Check if already connected
+        const isConnected = await Connection.findOne({
+          where: {
+            [Op.or]: [
+              { userId: userId, friendId: user.id },
+              { userId: user.id, friendId: userId },
+            ],
+          },
+        });
+        if (isConnected) {
+          connectionStatus = "connected";
+        }
+
+        return {
+          ...user.toJSON(),
+          connectionStatus,
+        };
+      })
+    );
+
     return new ApiResponse({
       status: 200,
       message: "Random users fetched successfully",
-      data: randomUsers,
+      data: randomUsersWithStatus,
     }).send(res);
   }
 });
@@ -184,9 +278,23 @@ export const getProfile = asyncHandler(async (req, res) => {
     connectionStatus = "received";
   }
 
+  const isConnected = await Connection.findOne({
+    where: {
+      [Op.or]: [
+        { userId: userId, friendId: req.user.id },
+        { userId: req.user.id, friendId: userId },
+      ],
+    },
+  });
+
+  if (isConnected) {
+    connectionStatus = "connected";
+  }
+
   let responseData = {
     user,
     connectionStatus,
+    chatId: isConnected ? isConnected.conversationId : null,
   };
 
   return new ApiResponse({

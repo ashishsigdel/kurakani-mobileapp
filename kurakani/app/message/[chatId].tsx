@@ -18,6 +18,11 @@ import { User } from "@/types/User";
 import { useSocket } from "@/helper/SocketProvider";
 import { ChatMessage } from "@/types/ChatMessage";
 
+interface TypingEventPayload {
+  chatId: string;
+  receiverId: string;
+}
+
 const Chat = () => {
   const { chatId } = useLocalSearchParams();
 
@@ -200,22 +205,26 @@ const Chat = () => {
   };
 
   // Listen for typing events
+  // Then update your socket event handlers like this:
   useEffect(() => {
     if (!socket) return;
 
     // Listen for typing status from other user
-    socket.on("userTyping", ({ chatId: typingChatId }) => {
+    socket.on("userTyping", ({ chatId: typingChatId }: TypingEventPayload) => {
       if (typingChatId === chatId) {
         setIsTyping(true);
       }
     });
 
     // Listen for stop typing status from other user
-    socket.on("userStoppedTyping", ({ chatId: typingChatId }) => {
-      if (typingChatId === chatId) {
-        setIsTyping(false);
+    socket.on(
+      "userStoppedTyping",
+      ({ chatId: typingChatId }: TypingEventPayload) => {
+        if (typingChatId === chatId) {
+          setIsTyping(false);
+        }
       }
-    });
+    );
 
     // Cleanup function
     return () => {

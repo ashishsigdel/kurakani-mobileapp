@@ -5,6 +5,7 @@ import CustomButton from "./CustomButton";
 import { User } from "@/types/User";
 import { formatDistanceToNow } from "date-fns";
 import { myAxios } from "@/helper/apiServices";
+import { Link } from "expo-router";
 
 interface RequestUserProps {
   request: any;
@@ -54,14 +55,16 @@ const RequestUser: React.FC<RequestUserProps> = ({
   return (
     <View className="py-4 px-4 flex-row items-center justify-between border-b border-white/10">
       <View className="flex-row items-center space-x-5">
-        <Image
-          source={
-            request.sender.profilePic
-              ? { uri: request.sender.profilePic }
-              : profile
-          }
-          className="w-[60px] h-[60px] rounded-full"
-        />
+        <Link href={`/profile/${request.sender.id}`}>
+          <Image
+            source={
+              request.sender.profilePic
+                ? { uri: request.sender.profilePic }
+                : profile
+            }
+            className="w-[60px] h-[60px] rounded-full"
+          />
+        </Link>
         <View className="flex-1">
           <Text className="text-[18px] text-white font-semibold mb-1">
             {request.sender.fullName}

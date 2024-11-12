@@ -17,6 +17,10 @@ const RootLayout = () => {
             name="message/[chatId]"
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="profile/[userId]"
+            options={{ headerShown: false }}
+          />
         </Stack>
       </SocketProvider>
     </AuthProvider>

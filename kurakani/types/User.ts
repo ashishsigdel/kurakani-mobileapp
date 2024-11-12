@@ -1,7 +1,8 @@
 export type User = {
-  id: number;
+  id: string;
   fullName: string;
-  email: string;
-  profilePic: string;
   username: string;
+  email: string;
+  profilePic?: string;
+  connectionStatus?: "sent" | "received" | "connected" | null;
 };

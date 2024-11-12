@@ -5,13 +5,15 @@ import {
   GestureResponderEvent,
 } from "react-native";
 import React from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 interface CustomButtonProps {
   title: string;
-  handlePress: (event: GestureResponderEvent) => void;
+  handlePress?: (event: GestureResponderEvent) => void;
   containerStyles?: string;
   textStyles?: string;
   isLoading?: boolean;
+  iconname?: any;
 }
 
 const CustomButton = ({
@@ -20,6 +22,7 @@ const CustomButton = ({
   containerStyles,
   textStyles,
   isLoading,
+  iconname,
 }: CustomButtonProps) => {
   return (
     <TouchableOpacity
@@ -28,6 +31,8 @@ const CustomButton = ({
         isLoading ? "opacity-50" : "opacity-100"
       }`}
     >
+      {iconname && <Ionicons name={iconname} size={18} color={"white"} />}
+
       <Text className={`${textStyles}`}>
         {isLoading ? "Loading..." : title}
       </Text>

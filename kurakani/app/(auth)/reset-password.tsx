@@ -1,4 +1,12 @@
-import { View, Text, Image, ScrollView, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
 import logo from "@/assets/logo.png";
@@ -44,53 +52,59 @@ const resetPassword = () => {
   };
   return (
     <SafeAreaView className="bg-primary h-full">
-      <ScrollView>
-        <View className="min-h-screen">
-          <View className="h-[90vh] w-full justify-center items-center px-4 my-6">
-            <Image
-              source={logo}
-              className="w-[130px]  h-[130px]"
-              resizeMode="contain"
-            />
-            <Text className="text-3xl text-white font-bold text-center">
-              Enter new password
-            </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // Adjust as needed
+        style={{ flex: 1 }}
+      >
+        <ScrollView>
+          <View className="min-h-screen">
+            <View className="h-[90vh] w-full justify-center items-center px-4 my-6">
+              <Image
+                source={logo}
+                className="w-[130px]  h-[130px]"
+                resizeMode="contain"
+              />
+              <Text className="text-3xl text-white font-bold text-center">
+                Enter new password
+              </Text>
 
-            <FormField
-              title="Password*"
-              value={form.password}
-              handleChange={(e: any) =>
-                setform({
-                  ...form,
-                  password: e,
-                })
-              }
-              otherStyles="mt-5"
-              placeholder="Enter your password..."
-            />
-            <FormField
-              title="Confirm Password*"
-              value={form.confirmPassword}
-              handleChange={(e: any) =>
-                setform({
-                  ...form,
-                  confirmPassword: e,
-                })
-              }
-              otherStyles="mt-5"
-              placeholder="Re-enter your password..."
-            />
+              <FormField
+                title="Password*"
+                value={form.password}
+                handleChange={(e: any) =>
+                  setform({
+                    ...form,
+                    password: e,
+                  })
+                }
+                otherStyles="mt-5"
+                placeholder="Enter your password..."
+              />
+              <FormField
+                title="Confirm Password*"
+                value={form.confirmPassword}
+                handleChange={(e: any) =>
+                  setform({
+                    ...form,
+                    confirmPassword: e,
+                  })
+                }
+                otherStyles="mt-5"
+                placeholder="Re-enter your password..."
+              />
 
-            <CustomButton
-              title={"Change Password"}
-              handlePress={handleChangepassword}
-              containerStyles={"py-2 px-3 bg-secondary w-full mt-7"}
-              textStyles={"text-xl text-white font-semibold uppercase"}
-              isLoading={isLoading}
-            />
+              <CustomButton
+                title={"Change Password"}
+                handlePress={handleChangepassword}
+                containerStyles={"py-2 px-3 bg-secondary w-full mt-7"}
+                textStyles={"text-xl text-white font-semibold uppercase"}
+                isLoading={isLoading}
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
