@@ -37,9 +37,12 @@ const signup = () => {
       });
       router.push("/signin");
     } catch (error: any) {
-      if (error.response.data.message) {
-        Alert.alert("Error!", error.response.data.message);
+      console.log(error?.response);
+
+      if (!error.response.data.message) {
+        Alert.alert("Error!", "Something went wrong!");
       }
+      Alert.alert("Error!", error?.response?.data?.message);
     } finally {
       setIsLoading(false);
     }
